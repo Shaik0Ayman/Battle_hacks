@@ -30,6 +30,7 @@
         <input id="product-name" type="text" placeholder="Product Name" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600" required>
         <input id="product-id" type="text" placeholder="Product ID" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600" required>
         <input id="product-price" type="number" placeholder="Price (₹)" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600" required>
+        <input id="product-expiry" type="date" placeholder="Expiry Date" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600">
         <textarea id="product-description" placeholder="Product Description" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 col-span-1 sm:col-span-2 lg:col-span-3"></textarea>
         <select id="qr-color" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600">
           <option value="#000000">Black</option>
@@ -75,16 +76,19 @@
     const batch = [];
 
     // Generate QR Code
+    // Generate QR Code
+    // Generate QR Code
     qrForm.addEventListener("submit", (e) => {
       e.preventDefault();
       const name = document.getElementById("product-name").value.trim();
       const id = document.getElementById("product-id").value.trim();
       const price = document.getElementById("product-price").value.trim();
-      const description = document.getElementById("product-description").value.trim();
+      const expiry = document.getElementById("product-expiry").value.trim();
       const color = document.getElementById("qr-color").value;
-
+    
       if (name && id && price) {
-        const qrData = JSON.stringify({ name, id, price, description });
+        // Include only the required fields in the QR code
+        const qrData = JSON.stringify({ name, id, price, expiry });
         qrCodeContainer.innerHTML = ""; // Clear previous QR code
         const canvas = document.createElement("canvas");
         qrCodeContainer.appendChild(canvas); // Append canvas to container
@@ -100,24 +104,25 @@
         alert("Please fill out all required fields.");
       }
     });
-
+    
     // Add to Batch
     function addToBatch() {
       const name = document.getElementById("product-name").value.trim();
       const id = document.getElementById("product-id").value.trim();
       const price = document.getElementById("product-price").value.trim();
-      const description = document.getElementById("product-description").value.trim();
+      const expiry = document.getElementById("product-expiry").value.trim();
       const color = document.getElementById("qr-color").value;
-
+    
       if (name && id && price) {
-        const qrData = JSON.stringify({ name, id, price, description });
+        // Include only the required fields in the batch QR code
+        const qrData = JSON.stringify({ name, id, price, expiry });
         batch.push({ qrData, color });
         renderBatch();
       } else {
         alert("Please fill out all required fields.");
       }
     }
-
+    
     // Render Batch QR Codes
     function renderBatch() {
       batchQrCodes.innerHTML = "";
