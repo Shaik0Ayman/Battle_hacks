@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Billing Page</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f8f8f8;
+      padding: 20px;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      border-bottom: 1px solid #ddd;
+      text-align: left;
+    }
+
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+
+    .total {
+      text-align: right;
+      margin-top: 20px;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      margin-top: 20px;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background-color: #218838;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Billing Page</h2>
+
+    <table id="billingTable">
+      <thead>
+        <tr>
+          <th>Product</th>
+          <th>Qty</th>
+          <th>Price (₹)</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- JS will populate this -->
+      </tbody>
+    </table>
+
+    <div class="total" id="totalAmount">Total: ₹0</div>
+
+    <button class="btn" onclick="goToPayment()">Proceed to Payment</button>
+  </div>
+
+  <script>
+    // Example data (can be passed from QR or sensor input via backend)
+    const cartItems = [
+      { name: "Milk", quantity: 2, price: 30 },
+      { name: "Bread", quantity: 1, price: 25 },
+      { name: "Eggs", quantity: 1, price: 50 }
+    ];
+
+    const tbody = document.querySelector('#billingTable tbody');
+    const totalAmountEl = document.getElementById('totalAmount');
+
+    let total = 0;
+
+    cartItems.forEach(item => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${item.name}</td>
+        <td>${item.quantity}</td>
+        <td>₹${item.quantity * item.price}</td>
+      `;
+      tbody.appendChild(row);
+      total += item.quantity * item.price;
+    });
+
+    totalAmountEl.innerText = Total: ₹${total};
+
+    function goToPayment() {
+      window.location.href = "payment.html";  // Change if different file name
+    }
+  </script>
+</body>
+</html>

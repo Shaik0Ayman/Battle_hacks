@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>QR Code Generator</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f8f9fa;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #343a40;
+    }
+
+    .container {
+      max-width: 1000px;
+      margin: auto;
+      background: #fff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .product {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 15px 0;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
+    }
+
+    .product-name {
+      font-weight: 500;
+      font-size: 18px;
+    }
+
+    .btn {
+      background-color: #007bff;
+      color: white;
+      padding: 8px 12px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .btn:hover {
+      background-color: #0056b3;
+    }
+
+    .qr {
+      margin-top: 10px;
+      display: flex;
+      justify-content: center;
+    }
+
+    canvas {
+      margin: 10px;
+    }
+
+    .nav-section {
+      margin-top: 25px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .nav-btn {
+      background-color: #6c757d;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .nav-btn:hover {
+      background-color: #5a6268;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🔲 QR Code Generator</h2>
+
+  <div class="container" id="productList">
+    <!-- Products and QR Codes will be rendered here -->
+  </div>
+
+  <div class="nav-section">
+    <button class="nav-btn" onclick="goBack()">Back to Inventory</button>
+    <button class="nav-btn" onclick="goHome()">Home</button>
+  </div>
+
+  <script>
+    const productList = document.getElementById("productList");
+    const products = JSON.parse(localStorage.getItem("products")) || [];
+
+    products.forEach((product, index) => {
+      const productDiv = document.createElement("div");
+      productDiv.classList.add("product");
+
+      const name = document.createElement("span");
+      name.classList.add("product-name");
+      name.textContent = `${product.name} - ₹${product.price}`;
+
+      const btn = document.createElement("button");
+      btn.classList.add("btn");
+      btn.textContent = "Generate QR";
+      btn.onclick = () => generateQR(product, index);
+
+      const qrDiv = document.createElement("div");
+      qrDiv.id = `qr-${index}`;
+      qrDiv.classList.add("qr");
+
+      productDiv.appendChild(name);
+      productDiv.appendChild(btn);
+      productList.appendChild(productDiv);
+      productList.appendChild(qrDiv);
+    });
+
+    function generateQR(product, index) {
+      const qrText = `Product: ${product.name}\nPrice: ₹${product.price}`;
+      const qrContainer = document.getElementById(`qr-${index}`);
+      qrContainer.innerHTML = "";
+      QRCode.toCanvas(qrText, { width: 200 }, function (err, canvas) {
+        if (err) console.error(err);
+        else qrContainer.appendChild(canvas);
+      });
+    }
+
+    function goBack() {
+      window.location.href = "inventory.html";
+    }
+
+    function goHome() {
+      window.location.href = "index.html";
+    }
+  </script>
+
+</body>
+</html>

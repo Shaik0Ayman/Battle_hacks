@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>View Products / Cart</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f8f9fa;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #343a40;
+    }
+
+    .product-list {
+      max-width: 800px;
+      margin: 30px auto;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 20px;
+      justify-content: center;
+    }
+
+    .product {
+      background-color: white;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+      width: 200px;
+      text-align: center;
+    }
+
+    .product h4 {
+      margin: 10px 0 5px;
+    }
+
+    .product p {
+      margin: 0;
+      color: #555;
+    }
+
+    .total {
+      text-align: center;
+      margin: 20px 0;
+      font-size: 1.2rem;
+      font-weight: bold;
+    }
+
+    .btn, .nav-btn {
+      display: block;
+      width: 80%;
+      margin: 15px auto;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      text-align: center;
+    }
+
+    .btn:hover, .nav-btn:hover {
+      background-color: #0056b3;
+    }
+
+    .nav-section {
+      display: flex;
+      justify-content: space-between;
+      max-width: 800px;
+      margin: 30px auto 0;
+    }
+
+    .nav-btn {
+      width: 48%;
+      background-color: #6c757d;
+    }
+
+    .nav-btn:hover {
+      background-color: #5a6268;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🛒 Products in Cart (via Sensor/QR)</h2>
+
+  <div class="product-list" id="productList"></div>
+
+  <div class="total">Total: ₹<span id="totalPrice">0</span></div>
+
+  <button class="btn" onclick="goToBilling()">Proceed to Billing</button>
+
+  <!-- Navigation -->
+  <div class="nav-section">
+    <button class="nav-btn" onclick="goBack()">⬅ Back</button>
+    <button class="nav-btn" onclick="goHome()">🏠 Home</button>
+  </div>
+
+  <script>
+    const sampleCart = [
+      { name: "Milk", price: 45 },
+      { name: "Bread", price: 30 },
+      { name: "Eggs (6 pcs)", price: 60 },
+      { name: "Juice", price: 50 }
+    ];
+
+    const productListDiv = document.getElementById("productList");
+    let total = 0;
+
+    sampleCart.forEach(item => {
+      const div = document.createElement("div");
+      div.className = "
+    product";
+    div.innerHTML = `
+      <h4>${item.name}</h4>
+      <p>Price: ₹${item.price}</p>
+      <div id="qrcode-${item.name}" class="qrcode"></div>
+    `;
+    productListDiv.appendChild(div);
+
+    // Generate QR Code for each product
+    const qrCodeDiv = document.getElementById(`qrcode-${item.name}`);
+    const qrCodeData = `Product: ${item.name}, Price: ₹${item.price}`;
+    new QRCode(qrCodeDiv, {
+      text: qrCodeData,
+      width: 100,
+      height: 100,
+      colorDark: "#343a40",
+      colorLight: "#f8f9fa",
+      correctLevel: QRCode.CorrectLevel.H
+    });
+
+    total += item.price;
+    });
+
+        alert("Proceeding to Billing...");
+          }
+
+          function goBack() {
+        alert("Going Back...");
+          }
+
+          function goHome() {
+        alert("Going Home...");
+          }
+        </script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>

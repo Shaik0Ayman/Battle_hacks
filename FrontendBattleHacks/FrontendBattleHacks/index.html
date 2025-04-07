@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Smart Trolley - Landing Page</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/@popperjs/core@2"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+</head>
+<body class="bg-gray-100 text-gray-900 font-sans">
+
+  <div class="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-indigo-200 via-purple-200 to-pink-200">
+    <div class="text-center mb-8">
+      <h1 class="text-5xl font-bold text-gray-800 animate_animated animate_fadeInDown">Welcome to Kart Sentinel</h1>
+      <p class="mt-4 text-lg text-gray-700 animate_animated animatefadeIn animate_delay-1s">Please select your role to continue</p>
+    </div>
+
+    <div class="flex gap-10 animate_animated animatezoomIn animate_delay-2s">
+      <!-- Customer Card -->
+      <div onclick="openModal('Customer')" class="cursor-pointer bg-white rounded-2xl shadow-xl p-8 w-72 hover:scale-105 transition">
+        <img src="https://img.icons8.com/fluency/96/shopping-cart-loaded.png" class="mx-auto mb-4" alt="Customer"/>
+        <h2 class="text-2xl font-semibold text-center">I am a Customer</h2>
+      </div>
+
+      <!-- Seller Card -->
+      <div onclick="openModal('Seller')" class="cursor-pointer bg-white rounded-2xl shadow-xl p-8 w-72 hover:scale-105 transition">
+        <img src="https://img.icons8.com/fluency/96/sell.png" class="mx-auto mb-4" alt="Seller"/>
+        <h2 class="text-2xl font-semibold text-center">I am a Retailer
+        </h2>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal -->
+  <div id="roleModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+    <div class="bg-white p-6 rounded-xl w-96 text-center shadow-2xl">
+      <h2 class="text-2xl font-bold mb-4">Continue as <span id="selectedRole" class="text-indigo-600"></span>?</h2>
+      <div class="flex justify-around mt-6">
+        <button onclick="proceed()" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700">Yes</button>
+        <button onclick="closeModal()" class="bg-gray-300 px-6 py-2 rounded-lg hover:bg-gray-400">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let role = "";
+
+    function openModal(selected) {
+      role = selected;
+      document.getElementById("selectedRole").textContent = selected;
+      document.getElementById("roleModal").classList.remove("hidden");
+      document.getElementById("roleModal").classList.add("flex");
+    }
+
+    function closeModal() {
+      document.getElementById("roleModal").classList.add("hidden");
+    }
+
+    function proceed() {
+      if (role === "Customer") {
+        window.location.href = "./customer/cart.html";
+      } else if (role === "Seller") {
+        window.location.href = "./Retailer/inventory.html";
+      }
+    }
+  </script>
+</body>
+</html>

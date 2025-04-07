@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Payment Page</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f0f2f5;
+      padding: 20px;
+      margin: 0;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: auto;
+      background-color: white;
+      padding: 25px;
+      border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #333;
+    }
+
+    .total {
+      text-align: center;
+      font-size: 1.2rem;
+      margin: 20px 0;
+      font-weight: bold;
+    }
+
+    label {
+      display: block;
+      margin: 15px 0 5px;
+      color: #555;
+    }
+
+    select, input[type="text"] {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    .btn, .nav-btn {
+      width: 100%;
+      margin-top: 20px;
+      padding: 12px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      cursor: pointer;
+    }
+
+    .btn:hover, .nav-btn:hover {
+      background-color: #0056b3;
+    }
+
+    .success-msg {
+      text-align: center;
+      color: green;
+      font-weight: bold;
+      margin-top: 20px;
+      display: none;
+    }
+
+    .nav-section {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 30px;
+    }
+
+    .nav-btn {
+      width: 48%;
+      background-color: #6c757d;
+    }
+
+    .nav-btn:hover {
+      background-color: #5a6268;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Payment Page</h2>
+
+    <div class="total">Total to Pay: ₹<span id="payAmount">0</span></div>
+
+    <label for="paymentMode">Choose Payment Mode:</label>
+    <select id="paymentMode">
+      <option value="upi">UPI</option>
+      <option value="card">Card</option>
+      <option value="cash">Cash</option>
+    </select>
+
+    <div id="upiField" style="display:none;">
+      <label for="upiId">Enter UPI ID:</label>
+      <input type="text" id="upiId" placeholder="example@upi">
+    </div>
+
+    <div id="cardField" style="display:none;">
+      <label for="cardNumber">Enter Card Number:</label>
+      <input type="text" id="cardNumber" placeholder="xxxx-xxxx-xxxx-xxxx">
+    </div>
+
+    <button class="btn" onclick="confirmPurchase()">Confirm Purchase</button>
+
+    <div class="success-msg" id="successMsg">✅ Payment Successful! Redirecting...</div>
+
+    <!-- Navigation Buttons -->
+    <div class="nav-section">
+      <button class="nav-btn" onclick="goBack()">⬅ Back</button>
+      <button class="nav-btn" onclick="goHome()">🏠 Home</button>
+    </div>
+  </div>
+
+  <script>
+    const payAmount = localStorage.getItem("totalAmount") || 0;
+    document.getElementById("payAmount").innerText = payAmount;
+
+    const modeSelector = document.getElementById("paymentMode");
+    const upiField = document.getElementById("upiField");
+    const cardField = document.getElementById("cardField");
+
+    modeSelector.addEventListener("change", function () {
+      const selected = this.value;
+      upiField.style.display = selected === "upi" ? "block" : "none";
+      cardField.style.display = selected === "card" ? "block" : "none";
+    });
+
+    function confirmPurchase() {
+      document.getElementById("successMsg").style.display = "block";
+      setTimeout(() => {
+        window.location.href = "index.html"; // Go to home after success
+      }, 2000);
+    }
+
+    function goBack() {
+      window.location.href = "billing.html";
+    }
+
+    function goHome() {
+      window.location.href = "index.html";
+    }
+  </script>
+</body>
+</html>
+
+<!-- Add a footer for better aesthetics -->
+<footer style="text-align: center; margin-top: 40px; font-size: 0.9rem; color: #777;">
+  <p>&copy; 2023 Payment Solutions Inc. All rights reserved.</p>
+  <p>Need help? <a href="support.html" style="color: #007bff; text-decoration: none;">Contact Support</a></p>
+</footer>

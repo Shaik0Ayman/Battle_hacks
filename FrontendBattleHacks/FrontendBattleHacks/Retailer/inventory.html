@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Seller Inventory</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f1f3f5;
+      padding: 20px;
+    }
+
+    h2 {
+      text-align: center;
+      color: #343a40;
+    }
+
+    .inventory-container {
+      max-width: 900px;
+      margin: auto;
+      background: #fff;
+      padding: 25px;
+      border-radius: 12px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #dee2e6;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background-color: #007bff;
+      color: white;
+    }
+
+    input[type="text"], input[type="number"] {
+      padding: 8px;
+      margin: 5px;
+      width: calc(100% - 22px);
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+
+    .btn {
+      padding: 8px 14px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      background-color: #218838;
+    }
+
+    .btn-danger {
+      background-color: #dc3545;
+    }
+
+    .btn-danger:hover {
+      background-color: #c82333;
+    }
+
+    .btn-edit {
+      background-color: #ffc107;
+    }
+
+    .btn-edit:hover {
+      background-color: #e0a800;
+    }
+
+    .form-inline {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .nav-section {
+      margin-top: 20px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .nav-btn {
+      background-color: #6c757d;
+      color: white;
+      padding: 10px 15px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    .nav-btn:hover {
+      background-color: #5a6268;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>📦 Seller - Product Inventory</h2>
+
+  <div class="inventory-container">
+    <form id="productForm" class="form-inline">
+      <input type="text" id="name" placeholder="Product Name" required>
+      <input type="number" id="price" placeholder="Price (₹)" required>
+      <button type="submit" class="btn">Add Product</button>
+    </form>
+
+    <table id="inventoryTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Name</th>
+          <th>Price (₹)</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div class="nav-section">
+      <button class="nav-btn" onclick="goToQR()">Go to QR Generator</button>
+      <button class="nav-btn" onclick="goHome()">Home</button>
+    </div>
+  </div>
+
+  <script>
+    const tableBody = document.querySelector("#inventoryTable tbody");
+    const form = document.getElementById("productForm");
+    let products = JSON.parse(localStorage.getItem("products")) || [];
+    let editIndex = -1;
+
+    function renderTable() {
+      tableBody.innerHTML = "";
+      products.forEach((product, index) => {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${index + 1}</td>
+          <td>${product.name}</td>
+          <td>₹${product.price}</td>
+          <td>
+            <button class="btn btn-edit" onclick="editProduct(${index})">Edit</button>
+            <button class="btn btn-danger" onclick="deleteProduct(${index})">Delete</button>
+          </td>
+        `;
+        tableBody.appendChild(row);
+      });
+
+      localStorage.setItem("products", JSON.stringify(products));
+    }
+
+    function editProduct(index) {
+      const product = products[index];
+      document.getElementById("name").value = product.name;
+      document.getElementById("price").value = product.price;
+      editIndex = index;
+    }
+
+    function deleteProduct(index) {
+      products.splice(index, 1);
+      renderTable();
+    }
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = document.getElementById("name").value.trim();
+      const price = parseInt(document.getElementById("price").value);
+
+      if (editIndex >= 0) {
+        products[editIndex] = { name, price };
+        editIndex = -1;
+      } else {
+        products.push({ name, price });
+      }
+
+      form.reset();
+      renderTable();
+    });
+
+    function goToQR() {
+      window.location.href = "qr.html"; // next page
+    }
+
+    function goHome() {
+      window.location.href = "index.html";
+    }
+
+    // Load table initially
+    renderTable();
+  </script>
+
+</body>
+</html>
+<script>
+  // Prepopulate the table with 15 products
+  products = [
+    { name: "Product 1", price: 100 },
+    { name: "Product 2", price: 200 },
+    { name: "Product 3", price: 300 },
+    { name: "Product 4", price: 400 },
+    { name: "Product 5", price: 500 },
+    { name: "Product 6", price: 600 },
+    { name: "Product 7", price: 700 },
+    { name: "Product 8", price: 800 },
+    { name: "Product 9", price: 900 },
+    { name: "Product 10", price: 1000 },
+    { name: "Product 11", price: 1100 },
+    { name: "Product 12", price: 1200 },
+    { name: "Product 13", price: 1300 },
+    { name: "Product 14", price: 1400 },
+    { name: "Product 15", price: 1500 }
+  ];
+
+  localStorage.setItem("products", JSON.stringify(products));
+  renderTable();
+</script></script>
