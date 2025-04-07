@@ -10,34 +10,47 @@
       font-family: 'Segoe UI', sans-serif;
       background-color: #f8f9fa;
       padding: 20px;
+      margin: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
     }
 
     h2 {
       text-align: center;
       color: #343a40;
+      margin-bottom: 20px;
     }
 
     .container {
       max-width: 1000px;
-      margin: auto;
+      width: 100%;
       background: #fff;
       padding: 20px;
       border-radius: 12px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
     }
 
     .product {
-      display: flex;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: 1fr auto auto;
       align-items: center;
-      margin: 15px 0;
-      border-bottom: 1px solid #ddd;
-      padding-bottom: 10px;
+      gap: 10px;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      background-color: #f8f9fa;
     }
 
     .product-name {
       font-weight: 500;
-      font-size: 18px;
+      font-size: 16px;
+      word-wrap: break-word;
     }
 
     .btn {
@@ -55,9 +68,10 @@
     }
 
     .qr {
-      margin-top: 10px;
+      grid-column: span 3;
       display: flex;
       justify-content: center;
+      margin-top: 10px;
     }
 
     canvas {
@@ -67,7 +81,9 @@
     .nav-section {
       margin-top: 25px;
       display: flex;
-      justify-content: space-between;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 10px;
     }
 
     .nav-btn {
@@ -77,10 +93,35 @@
       border: none;
       border-radius: 8px;
       cursor: pointer;
+      font-size: 14px;
     }
 
     .nav-btn:hover {
       background-color: #5a6268;
+    }
+
+    @media (max-width: 768px) {
+      .container {
+        padding: 10px;
+      }
+
+      .product {
+        grid-template-columns: 1fr;
+        text-align: center;
+      }
+
+      .btn {
+        width: 100%;
+      }
+
+      .nav-section {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .nav-btn {
+        width: 100%;
+      }
     }
   </style>
 </head>
@@ -100,30 +141,36 @@
   <script>
     const productList = document.getElementById("productList");
     const products = JSON.parse(localStorage.getItem("products")) || [];
-
+  
     products.forEach((product, index) => {
       const productDiv = document.createElement("div");
       productDiv.classList.add("product");
-
+  
       const name = document.createElement("span");
       name.classList.add("product-name");
       name.textContent = `${product.name} - ₹${product.price}`;
-
-      const btn = document.createElement("button");
-      btn.classList.add("btn");
-      btn.textContent = "Generate QR";
-      btn.onclick = () => generateQR(product, index);
-
+  
+      const btnGenerate = document.createElement("button");
+      btnGenerate.classList.add("btn");
+      btnGenerate.textContent = "Generate QR";
+      btnGenerate.onclick = () => generateQR(product, index);
+  
+      const btnPrint = document.createElement("button");
+      btnPrint.classList.add("btn");
+      btnPrint.textContent = "Print QR";
+      btnPrint.onclick = () => printQR(product, index);
+  
       const qrDiv = document.createElement("div");
       qrDiv.id = `qr-${index}`;
       qrDiv.classList.add("qr");
-
+  
       productDiv.appendChild(name);
-      productDiv.appendChild(btn);
+      productDiv.appendChild(btnGenerate);
+      productDiv.appendChild(btnPrint);
       productList.appendChild(productDiv);
       productList.appendChild(qrDiv);
     });
-
+  
     function generateQR(product, index) {
       const qrText = `Product: ${product.name}\nPrice: ₹${product.price}`;
       const qrContainer = document.getElementById(`qr-${index}`);
@@ -133,11 +180,37 @@
         else qrContainer.appendChild(canvas);
       });
     }
+  
+    function printQR(product, index) {
+      const qrContainer = document.getElementById(`qr-${index}`);
+      const canvas = qrContainer.querySelector("canvas");
+      if (!canvas) {
+        alert("Please generate the QR code first!");
+        return;
+      }
 
+      const qrImage = canvas.toDataURL("image/png");
+
+      const printContent = `
+        <div style="text-align: center; font-family: 'Segoe UI', sans-serif;">
+          <h3>${product.name}</h3>
+          <p>Price: ₹${product.price}</p>
+          <img src="${qrImage}" alt="QR Code" style="width: 200px; height: 200px;" />
+        </div>
+      `;
+
+      const printWindow = window.open("", "_blank");
+      printWindow.document.body.innerHTML = printContent;
+      printWindow.document.close();
+      printWindow.focus();
+      printWindow.print();
+      printWindow.close();
+    }
+  
     function goBack() {
       window.location.href = "inventory.html";
     }
-
+  
     function goHome() {
       window.location.href = "index.html";
     }
