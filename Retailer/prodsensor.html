@@ -5,6 +5,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Product Inventory - Smart Trolley</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 </head>
 <body class="bg-gray-100 text-gray-900 font-sans">
 
@@ -33,26 +35,11 @@
         <input id="product-name" type="text" placeholder="Product Name" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600" required>
         <input id="product-id" type="text" placeholder="Product ID" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600" required>
         <input id="product-stock" type="number" placeholder="Stock Quantity" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600" required>
+        <input id="product-price" type="number" placeholder="Price (₹)" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600" required>
         <input id="product-expiry" type="date" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600" required>
         <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 col-span-1 sm:col-span-2 lg:col-span-3">Add Product</button>
         <p id="form-error" class="text-red-600 hidden col-span-1 sm:col-span-2 lg:col-span-3">Please fill out all fields correctly.</p>
       </form>
-    </div>
-
-    <!-- Search, Filter, and Export -->
-    <div class="flex flex-col md:flex-row justify-between items-center mb-8">
-      <input id="search-bar" type="text" placeholder="Search products..." class="w-full md:w-1/3 px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 mb-4 md:mb-0">
-      <select id="filter-expiry" class="w-full md:w-1/4 px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600">
-        <option value="">All Expiry Status</option>
-        <option value="expired">Expired</option>
-        <option value="valid">Valid</option>
-      </select>
-      <select id="filter-stock" class="w-full md:w-1/4 px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600">
-        <option value="">All Stock Levels</option>
-        <option value="low">Low Stock</option>
-        <option value="sufficient">Sufficient Stock</option>
-      </select>
-      <button onclick="exportToCSV()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">Export to CSV</button>
     </div>
 
     <!-- Product Table -->
@@ -64,6 +51,7 @@
             <th class="border px-4 py-2">Name</th>
             <th class="border px-4 py-2">ID</th>
             <th class="border px-4 py-2">Stock</th>
+            <th class="border px-4 py-2">Price (₹)</th>
             <th class="border px-4 py-2">Expiry</th>
             <th class="border px-4 py-2">Actions</th>
           </tr>
@@ -72,10 +60,6 @@
           <!-- Products will be dynamically loaded here -->
         </tbody>
       </table>
-      <div id="pagination" class="flex justify-center mt-4">
-        <button id="prev-page" class="bg-gray-300 px-4 py-2 rounded-lg mr-2 hover:bg-gray-400" disabled>Previous</button>
-        <button id="next-page" class="bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400">Next</button>
-      </div>
     </div>
   </div>
 
@@ -87,29 +71,23 @@
   </footer>
 
   <script>
-    const products = JSON.parse(localStorage.getItem("products")) || [];
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBJUHrYQTHeunfLN8SIucWW__9PWYSTAFQ",
+      authDomain: "battle-hacks.firebaseapp.com",
+      databaseURL: "https://battle-hacks-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "battle-hacks",
+      storageBucket: "battle-hacks.firebasestorage.app",
+      messagingSenderId: "244147143096",
+      appId: "1:244147143096:web:776f207c0d88e9ec55cf4d"
+    };
 
-    // Add 50 sample products if the product list is empty
-    if (products.length === 0) {
-      for (let i = 1; i <= 50; i++) {
-        products.push({
-          name: `Product ${i}`,
-          id: `P${i}`,
-          stock: Math.floor(Math.random() * 100), // Random stock between 0 and 99
-          expiry: new Date(Date.now() + Math.random() * 31536000000).toISOString().split("T")[0] // Random expiry within a year
-        });
-      }
-      localStorage.setItem("products", JSON.stringify(products));
-    }
-
-    const itemsPerPage = 5;
-    let currentPage = 1;
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
 
     const productForm = document.getElementById("product-form");
     const productTable = document.getElementById("product-table");
-    const searchBar = document.getElementById("search-bar");
-    const filterExpiry = document.getElementById("filter-expiry");
-    const filterStock = document.getElementById("filter-stock");
 
     // Add product
     productForm.addEventListener("submit", (e) => {
@@ -117,11 +95,12 @@
       const name = document.getElementById("product-name").value.trim();
       const id = document.getElementById("product-id").value.trim();
       const stock = parseInt(document.getElementById("product-stock").value.trim());
+      const price = parseFloat(document.getElementById("product-price").value.trim());
       const expiry = document.getElementById("product-expiry").value;
 
-      if (name && id && stock && expiry) {
-        products.push({ name, id, stock, expiry });
-        localStorage.setItem("products", JSON.stringify(products));
+      if (name && id && stock && price && expiry) {
+        const newProductRef = db.ref("products").push();
+        newProductRef.set({ name, id, stock, price, expiry });
         productForm.reset();
         document.getElementById("form-error").classList.add("hidden");
         loadProducts();
@@ -130,94 +109,47 @@
       }
     });
 
-    // Load products dynamically with pagination
+    // Load products
     function loadProducts() {
       productTable.innerHTML = "";
-      const searchQuery = searchBar.value.toLowerCase();
-      const expiryFilter = filterExpiry.value;
-      const stockFilter = filterStock.value;
-
-      const filteredProducts = products.filter(product => {
-        const matchesSearch = product.name.toLowerCase().includes(searchQuery) || product.id.toLowerCase().includes(searchQuery);
-        const isExpired = new Date(product.expiry) < new Date();
-        const matchesExpiry = expiryFilter === "expired" ? isExpired : expiryFilter === "valid" ? !isExpired : true;
-        const matchesStock = stockFilter === "low" ? product.stock < 5 : stockFilter === "sufficient" ? product.stock >= 5 : true;
-        return matchesSearch && matchesExpiry && matchesStock;
+      db.ref("products").once("value", (snapshot) => {
+        snapshot.forEach((childSnapshot) => {
+          const product = childSnapshot.val();
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td class="border px-4 py-2">${product.name}</td>
+            <td class="border px-4 py-2">${product.id}</td>
+            <td class="border px-4 py-2">${product.stock}</td>
+            <td class="border px-4 py-2">₹${product.price}</td>
+            <td class="border px-4 py-2">${product.expiry}</td>
+            <td class="border px-4 py-2">
+              <button class="text-blue-600 hover:underline" onclick="editProduct('${childSnapshot.key}')">Edit</button>
+              <button class="text-red-600 hover:underline" onclick="deleteProduct('${childSnapshot.key}')">Delete</button>
+            </td>
+          `;
+          productTable.appendChild(row);
+        });
       });
-
-      const startIndex = (currentPage - 1) * itemsPerPage;
-      const paginatedProducts = filteredProducts.slice(startIndex, startIndex + itemsPerPage);
-
-      paginatedProducts.forEach(product => {
-        const row = document.createElement("tr");
-        row.className = product.stock < 5 ? "bg-orange-100" : new Date(product.expiry) < new Date() ? "bg-red-100" : "";
-        row.innerHTML = `
-          <td class="border px-4 py-2">${product.name}</td>
-          <td class="border px-4 py-2">${product.id}</td>
-          <td class="border px-4 py-2">${product.stock}</td>
-          <td class="border px-4 py-2">${product.expiry}</td>
-          <td class="border px-4 py-2">
-            <button class="text-blue-600 hover:underline" onclick="editProduct('${product.id}')">Edit</button>
-            <button class="text-red-600 hover:underline" onclick="deleteProduct('${product.id}')">Delete</button>
-          </td>
-        `;
-        productTable.appendChild(row);
-      });
-
-      document.getElementById("prev-page").disabled = currentPage === 1;
-      document.getElementById("next-page").disabled = startIndex + itemsPerPage >= filteredProducts.length;
-    }
-
-    // Pagination controls
-    document.getElementById("prev-page").addEventListener("click", () => {
-      currentPage--;
-      loadProducts();
-    });
-
-    document.getElementById("next-page").addEventListener("click", () => {
-      currentPage++;
-      loadProducts();
-    });
-
-    // Export to CSV
-    function exportToCSV() {
-      const csvContent = "data:text/csv;charset=utf-8," + 
-        ["Name,ID,Stock,Expiry"].concat(products.map(p => `${p.name},${p.id},${p.stock},${p.expiry}`)).join("\n");
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", "product_inventory.csv");
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
     }
 
     // Edit product
-    function editProduct(id) {
-      const product = products.find(p => p.id === id);
-      if (product) {
+    function editProduct(key) {
+      db.ref(`products/${key}`).once("value", (snapshot) => {
+        const product = snapshot.val();
         document.getElementById("product-name").value = product.name;
         document.getElementById("product-id").value = product.id;
         document.getElementById("product-stock").value = product.stock;
+        document.getElementById("product-price").value = product.price;
         document.getElementById("product-expiry").value = product.expiry;
-        deleteProduct(id);
-      }
+        deleteProduct(key);
+      });
     }
 
     // Delete product
-    function deleteProduct(id) {
-      const index = products.findIndex(p => p.id === id);
-      if (index !== -1) {
-        products.splice(index, 1);
-        localStorage.setItem("products", JSON.stringify(products));
-        loadProducts();
-      }
+    function deleteProduct(key) {
+      db.ref(`products/${key}`).remove();
+      loadProducts();
     }
-
-    // Event listeners for search and filter
-    searchBar.addEventListener("input", loadProducts);
-    filterExpiry.addEventListener("change", loadProducts);
-    filterStock.addEventListener("change", loadProducts);
 
     // Initial load
     loadProducts();

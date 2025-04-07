@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Billing - Smart Trolley</title>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 </head>
 <body class="bg-gray-100 text-gray-900 font-sans">
 
@@ -53,7 +57,7 @@
         <p id="subtotal" class="text-gray-800 font-bold">₹0</p>
       </div>
       <div class="flex justify-between items-center mb-4">
-        <p class="text-gray-700">Tax (5%):</p>
+        <p class="text-gray-700">Tax (15%):</p>
         <p id="tax" class="text-gray-800 font-bold">₹0</p>
       </div>
       <div class="flex justify-between items-center mb-4">
@@ -72,81 +76,121 @@
   </footer>
 
   <!-- Script -->
-  <script>
-    // DEMO DATA: Only use this to populate test data
-    if (!localStorage.getItem("cart")) {
-      const sampleCart = [
-        { name: "Milk", price: 30, quantity: 2 },
-        { name: "Bread", price: 25, quantity: 1 },
-        { name: "Eggs", price: 60, quantity: 1 }
-      ];
-      localStorage.setItem("cart", JSON.stringify(sampleCart));
-    }
-
-    const cart = JSON.parse(localStorage.getItem("cart")) || [];
-
-    // Load cart items dynamically
+    <script>
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBJUHrYQTHeunfLN8SIucWW__9PWYSTAFQ",
+      authDomain: "battle-hacks.firebaseapp.com",
+      databaseURL: "https://battle-hacks-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "battle-hacks",
+      storageBucket: "battle-hacks.firebasestorage.app",
+      messagingSenderId: "244147143096",
+      appId: "1:244147143096:web:776f207c0d88e9ec55cf4d",
+    };
+  
+    // Initialize Firebase
+    const app = firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+  
+    // Load cart items dynamically from Firebase
     function loadCart() {
       const cartTable = document.getElementById("cart-table");
-      cartTable.innerHTML = "";
+      cartTable.innerHTML = ""; // Clear the table
       let subtotal = 0;
-
-      cart.forEach((item, index) => {
-        const total = item.price * item.quantity;
-        subtotal += total;
-
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td class="border px-4 py-2">${item.name}</td>
-          <td class="border px-4 py-2">₹${item.price}</td>
-          <td class="border px-4 py-2">
-            <input type="number" value="${item.quantity}" min="1" class="w-16 px-2 py-1 border rounded-lg" onchange="updateQuantity(${index}, this.value)">
-          </td>
-          <td class="border px-4 py-2">₹${total}</td>
-          <td class="border px-4 py-2">
-            <button class="text-red-600 hover:underline" onclick="removeItem(${index})">Remove</button>
-          </td>
-        `;
-        cartTable.appendChild(row);
+  
+      // Fetch cart data from Firebase
+      db.ref("cart").on("value", (snapshot) => {
+        cartTable.innerHTML = ""; // Clear the table on every update
+        subtotal = 0; // Reset subtotal
+  
+        snapshot.forEach((childSnapshot) => {
+          const cartItem = childSnapshot.val();
+          const total = cartItem.price * cartItem.quantity;
+          subtotal += total;
+  
+          // Create a row for each cart item
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td class="border px-4 py-2">${cartItem.name}</td>
+            <td class="border px-4 py-2">₹${cartItem.price}</td>
+            <td class="border px-4 py-2">${cartItem.quantity}</td>
+            <td class="border px-4 py-2">₹${total.toFixed(2)}</td>
+            <td class="border px-4 py-2">
+              <button class="text-red-600 hover:underline" onclick="removeItem('${childSnapshot.key}')">Remove</button>
+            </td>
+          `;
+          cartTable.appendChild(row);
+        });
+  
+        // Calculate tax and total
+        const tax = subtotal * 0.15;
+        const total = subtotal + tax;
+  
+        // Update the billing summary
+        document.getElementById("subtotal").textContent = `₹${subtotal.toFixed(2)}`;
+        document.getElementById("tax").textContent = `₹${tax.toFixed(2)}`;
+        document.getElementById("total").textContent = `₹${total.toFixed(2)}`;
       });
-
-      const tax = subtotal * 0.05;
-      const total = subtotal + tax;
-
-      document.getElementById("subtotal").textContent = `₹${subtotal.toFixed(2)}`;
-      document.getElementById("tax").textContent = `₹${tax.toFixed(2)}`;
-      document.getElementById("total").textContent = `₹${total.toFixed(2)}`;
     }
-
-    // Update quantity
-    function updateQuantity(index, quantity) {
-      if (quantity < 1) {
-        alert("Quantity must be at least 1.");
-        return;
-      }
-      cart[index].quantity = parseInt(quantity);
-      localStorage.setItem("cart", JSON.stringify(cart));
-      loadCart();
-    }
-
+  
     // Remove item from cart
-    function removeItem(index) {
-      cart.splice(index, 1);
-      localStorage.setItem("cart", JSON.stringify(cart));
-      loadCart();
+    function removeItem(cartItemId) {
+      // Remove the item from the cart in Firebase
+      db.ref(`cart/${cartItemId}`).remove();
     }
-
+  
+    // Proceed to checkout
+    // Proceed to checkout
+    // Proceed to checkout
+    // Proceed to checkout
     // Proceed to checkout
     function checkout() {
-      if (cart.length === 0) {
+      const subtotal = parseFloat(document.getElementById("subtotal").textContent.replace("₹", ""));
+      const tax = parseFloat(document.getElementById("tax").textContent.replace("₹", ""));
+      const total = subtotal + tax;
+    
+      if (total === 0) {
         alert("Your cart is empty.");
         return;
       }
-      alert("Thank you for your purchase!");
-      localStorage.removeItem("cart");
-      loadCart();
+    
+      // Generate UPI QR Code
+      const upiID = "shaikaymanhameedbaig@okhdfcbank"; // Replace with your UPI ID
+      const upiPayload = `upi://pay?pa=${upiID}&pn=Smart Trolley&am=${total.toFixed(2)}&cu=INR`;
+    
+      console.log("UPI Payload:", upiPayload); // Debugging
+    
+      // Clear the cart in Firebase
+      db.ref("cart").remove();
+    
+      // Display the QR code
+      const qrContainer = document.createElement("div");
+      qrContainer.className = "bg-white shadow-lg rounded-lg p-6 text-center";
+      qrContainer.innerHTML = `
+        <h2 class="text-lg font-bold text-gray-800 mb-4">Scan to Pay</h2>
+        <canvas id="qr-code" class="mb-4"></canvas>
+        <p class="text-gray-700">Total Amount: <span class="font-bold text-gray-800">₹${total.toFixed(2)}</span></p>
+        <p class="text-gray-700">UPI ID: <span class="font-bold text-gray-800">${upiID}</span></p>
+        <button onclick="location.reload()" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 mt-4">Done</button>
+      `;
+      document.body.innerHTML = ""; // Clear the page
+      document.body.appendChild(qrContainer);
+    
+      // Generate the QR code using the `qrcode` library
+      const qrCodeElement = document.getElementById("qr-code");
+      if (qrCodeElement) {
+        QRCode.toCanvas(qrCodeElement, upiPayload, function (error) {
+          if (error) {
+            console.error("Error generating QR code:", error);
+          } else {
+            console.log("QR code generated successfully!");
+          }
+        });
+      } else {
+        console.error("QR Code container not found!");
+      }
     }
-
+  
     // Initial load
     loadCart();
   </script>
