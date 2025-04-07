@@ -6,6 +6,8 @@
   <title>Generate QR Code - Smart Trolley</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script>
 </head>
 <body class="bg-gray-100 text-gray-900 font-sans">
 
@@ -23,39 +25,15 @@
   <div class="pt-20 px-4 sm:px-6 lg:px-8">
     <h1 class="text-4xl font-bold text-gray-800 mb-6 text-center">🧾 Generate QR Code</h1>
 
-    <!-- QR Code Form -->
-    <div class="bg-white shadow-lg rounded-lg p-6 mb-8">
-      <h2 class="text-lg font-bold text-gray-800 mb-4">Enter Product Details</h2>
-      <form id="qr-form" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <input id="product-name" type="text" placeholder="Product Name" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600" required>
-        <input id="product-id" type="text" placeholder="Product ID" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600" required>
-        <input id="product-price" type="number" placeholder="Price (₹)" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600" required>
-        <input id="product-expiry" type="date" placeholder="Expiry Date" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600">
-        <textarea id="product-description" placeholder="Product Description" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600 col-span-1 sm:col-span-2 lg:col-span-3"></textarea>
-        <select id="qr-color" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600">
-          <option value="#000000">Black</option>
-          <option value="#FF0000">Red</option>
-          <option value="#00FF00">Green</option>
-          <option value="#0000FF">Blue</option>
-        </select>
-        <button type="button" onclick="addToBatch()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700">Add to Batch</button>
-        <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 col-span-1 sm:col-span-2 lg:col-span-3">Generate QR Code</button>
-      </form>
-    </div>
-
-    <!-- Batch QR Codes -->
-    <div id="batch-display" class="bg-white shadow-lg rounded-lg p-6 hidden">
-      <h2 class="text-lg font-bold text-gray-800 mb-4">Batch QR Codes</h2>
-      <div id="batch-qr-codes" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"></div>
-      <button onclick="downloadBatch()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 mt-4">Download All</button>
-    </div>
+    <!-- Products List -->
+    <div id="products-list" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"></div>
 
     <!-- QR Code Display -->
     <div id="qr-display" class="bg-white shadow-lg rounded-lg p-6 hidden">
       <h2 class="text-lg font-bold text-gray-800 mb-4">Generated QR Code</h2>
       <div id="qr-code" class="flex justify-center mb-4"></div>
       <button id="download-qr" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">Download QR Code</button>
-      <button onclick="resetForm()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 ml-4">Reset</button>
+      <button onclick="resetQrDisplay()" class="bg-gray-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700 ml-4">Close</button>
     </div>
   </div>
 
@@ -67,86 +45,61 @@
   </footer>
 
   <script>
-    const qrForm = document.getElementById("qr-form");
+    // Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyBJUHrYQTHeunfLN8SIucWW__9PWYSTAFQ",
+      authDomain: "battle-hacks.firebaseapp.com",
+      databaseURL: "https://battle-hacks-default-rtdb.asia-southeast1.firebasedatabase.app",
+      projectId: "battle-hacks",
+      storageBucket: "battle-hacks.firebasestorage.app",
+      messagingSenderId: "244147143096",
+      appId: "1:244147143096:web:776f207c0d88e9ec55cf4d"
+    };
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const productsList = document.getElementById("products-list");
     const qrDisplay = document.getElementById("qr-display");
     const qrCodeContainer = document.getElementById("qr-code");
     const downloadButton = document.getElementById("download-qr");
-    const batchDisplay = document.getElementById("batch-display");
-    const batchQrCodes = document.getElementById("batch-qr-codes");
-    const batch = [];
 
-    // Generate QR Code
-    // Generate QR Code
-    // Generate QR Code
-    qrForm.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const name = document.getElementById("product-name").value.trim();
-      const id = document.getElementById("product-id").value.trim();
-      const price = document.getElementById("product-price").value.trim();
-      const expiry = document.getElementById("product-expiry").value.trim();
-      const color = document.getElementById("qr-color").value;
-    
-      if (name && id && price) {
-        // Include only the required fields in the QR code
-        const qrData = JSON.stringify({ name, id, price, expiry });
-        qrCodeContainer.innerHTML = ""; // Clear previous QR code
-        const canvas = document.createElement("canvas");
-        qrCodeContainer.appendChild(canvas); // Append canvas to container
-        QRCode.toCanvas(canvas, qrData, { width: 200, color: { dark: color, light: "#FFFFFF" } }, (error) => {
-          if (error) {
-            console.error("QR Code generation failed:", error);
-            alert("Failed to generate QR Code. Please try again.");
-          } else {
-            qrDisplay.classList.remove("hidden");
-          }
+    // Fetch and display all products
+    db.ref("products").once("value", (snapshot) => {
+      if (snapshot.exists()) {
+        const products = snapshot.val();
+        Object.keys(products).forEach((productId) => {
+          const product = products[productId];
+          const productCard = document.createElement("div");
+          productCard.className = "bg-white shadow-lg rounded-lg p-4";
+
+          productCard.innerHTML = `
+            <h3 class="text-lg font-bold text-gray-800">${product.name}</h3>
+            <p class="text-gray-700">Price: ₹${product.price}</p>
+            <p class="text-gray-700">Expiry: ${product.expiry || "N/A"}</p>
+            <button onclick="generateQrCode('${productId}', '${product.name}', ${product.price}, '${product.expiry || ""}')" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 mt-4">Generate QR Code</button>
+          `;
+          productsList.appendChild(productCard);
         });
       } else {
-        alert("Please fill out all required fields.");
+        productsList.innerHTML = "<p class='text-gray-700'>No products found in Firebase.</p>";
       }
     });
-    
-    // Add to Batch
-    function addToBatch() {
-      const name = document.getElementById("product-name").value.trim();
-      const id = document.getElementById("product-id").value.trim();
-      const price = document.getElementById("product-price").value.trim();
-      const expiry = document.getElementById("product-expiry").value.trim();
-      const color = document.getElementById("qr-color").value;
-    
-      if (name && id && price) {
-        // Include only the required fields in the batch QR code
-        const qrData = JSON.stringify({ name, id, price, expiry });
-        batch.push({ qrData, color });
-        renderBatch();
-      } else {
-        alert("Please fill out all required fields.");
-      }
-    }
-    
-    // Render Batch QR Codes
-    function renderBatch() {
-      batchQrCodes.innerHTML = "";
-      batch.forEach((item, index) => {
-        const qrCanvas = document.createElement("canvas");
-        QRCode.toCanvas(qrCanvas, item.qrData, { width: 150, color: { dark: item.color, light: "#FFFFFF" } }, (error) => {
-          if (error) console.error(error);
-        });
-        const qrWrapper = document.createElement("div");
-        qrWrapper.className = "flex flex-col items-center";
-        qrWrapper.innerHTML = `<p class="text-sm text-gray-700 mb-2">QR ${index + 1}</p>`;
-        qrWrapper.appendChild(qrCanvas);
-        batchQrCodes.appendChild(qrWrapper);
-      });
-      batchDisplay.classList.remove("hidden");
-    }
 
-    // Download Batch QR Codes
-    function downloadBatch() {
-      batchQrCodes.querySelectorAll("canvas").forEach((canvas, index) => {
-        const link = document.createElement("a");
-        link.href = canvas.toDataURL("image/png");
-        link.download = `qr-code-${index + 1}.png`;
-        link.click();
+    // Generate QR Code
+    function generateQrCode(productId, name, price, expiry) {
+      const qrData = JSON.stringify({ id: productId, name, price, expiry });
+      qrCodeContainer.innerHTML = ""; // Clear previous QR code
+      const canvas = document.createElement("canvas");
+      qrCodeContainer.appendChild(canvas); // Append canvas to container
+      QRCode.toCanvas(canvas, qrData, { width: 200, color: { dark: "#000000", light: "#FFFFFF" } }, (error) => {
+        if (error) {
+          console.error("QR Code generation failed:", error);
+          alert("Failed to generate QR Code. Please try again.");
+        } else {
+          qrDisplay.classList.remove("hidden");
+        }
       });
     }
 
@@ -163,13 +116,10 @@
       }
     });
 
-    // Reset Form
-    function resetForm() {
-      qrForm.reset();
+    // Reset QR Code Display
+    function resetQrDisplay() {
       qrDisplay.classList.add("hidden");
       qrCodeContainer.innerHTML = "";
-      batch.length = 0;
-      batchDisplay.classList.add("hidden");
     }
   </script>
 </body>
