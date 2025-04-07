@@ -1,153 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>View Products / Cart</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f8f9fa;
-      margin: 0;
-      padding: 20px;
-    }
-
-    h2 {
-      text-align: center;
-      color: #343a40;
-    }
-
-    .product-list {
-      max-width: 800px;
-      margin: 30px auto;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 20px;
-      justify-content: center;
-    }
-
-    .product {
-      background-color: white;
-      padding: 15px;
-      border-radius: 10px;
-      box-shadow: 0 0 8px rgba(0,0,0,0.1);
-      width: 200px;
-      text-align: center;
-    }
-
-    .product h4 {
-      margin: 10px 0 5px;
-    }
-
-    .product p {
-      margin: 0;
-      color: #555;
-    }
-
-    .total {
-      text-align: center;
-      margin: 20px 0;
-      font-size: 1.2rem;
-      font-weight: bold;
-    }
-
-    .btn, .nav-btn {
-      display: block;
-      width: 80%;
-      margin: 15px auto;
-      padding: 12px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 10px;
-      font-size: 1rem;
-      cursor: pointer;
-      text-align: center;
-    }
-
-    .btn:hover, .nav-btn:hover {
-      background-color: #0056b3;
-    }
-
-    .nav-section {
-      display: flex;
-      justify-content: space-between;
-      max-width: 800px;
-      margin: 30px auto 0;
-    }
-
-    .nav-btn {
-      width: 48%;
-      background-color: #6c757d;
-    }
-
-    .nav-btn:hover {
-      background-color: #5a6268;
-    }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Billing - Smart Trolley</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gray-100 text-gray-900 font-sans">
 
-  <h2>🛒 Products in Cart (via Sensor/QR)</h2>
+  <!-- Navigation Bar -->
+  <nav class="bg-white shadow-md w-full fixed top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <h1 class="text-2xl font-bold text-indigo-600">Smart Trolley</h1>
+        <div>
+          <a href="scanner.html" class="text-gray-700 hover:text-indigo-600 px-3 py-2">Scanner</a>
+          <a href="viewproducts.html" class="text-gray-700 hover:text-indigo-600 px-3 py-2">View Products</a>
+          <a href="billing.html" class="text-gray-700 hover:text-indigo-600 px-3 py-2">Billing</a>
+        </div>
+      </div>
+    </div>
+  </nav>
 
-  <div class="product-list" id="productList"></div>
+  <!-- Main Content -->
+  <div class="pt-20 px-4 sm:px-6 lg:px-8">
+    <h1 class="text-4xl font-bold text-gray-800 mb-6 text-center">🛒 Billing</h1>
 
-  <div class="total">Total: ₹<span id="totalPrice">0</span></div>
+    <!-- Cart Table -->
+    <div class="bg-white shadow-lg rounded-lg p-6 mb-8">
+      <h2 class="text-lg font-bold text-gray-800 mb-4">Your Cart</h2>
+      <table class="w-full border-collapse">
+        <thead>
+          <tr class="bg-gray-200">
+            <th class="border px-4 py-2">Product</th>
+            <th class="border px-4 py-2">Price</th>
+            <th class="border px-4 py-2">Quantity</th>
+            <th class="border px-4 py-2">Total</th>
+            <th class="border px-4 py-2">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="cart-table">
+          <!-- Cart items will be dynamically loaded here -->
+        </tbody>
+      </table>
+    </div>
 
-  <button class="btn" onclick="goToBilling()">Proceed to Billing</button>
-
-  <!-- Navigation -->
-  <div class="nav-section">
-    <button class="nav-btn" onclick="goBack()">⬅ Back</button>
-    <button class="nav-btn" onclick="goHome()">🏠 Home</button>
+    <!-- Billing Summary -->
+    <div class="bg-white shadow-lg rounded-lg p-6 mb-8">
+      <h2 class="text-lg font-bold text-gray-800 mb-4">Billing Summary</h2>
+      <div class="flex justify-between items-center mb-4">
+        <p class="text-gray-700">Subtotal:</p>
+        <p id="subtotal" class="text-gray-800 font-bold">₹0</p>
+      </div>
+      <div class="flex justify-between items-center mb-4">
+        <p class="text-gray-700">Tax (5%):</p>
+        <p id="tax" class="text-gray-800 font-bold">₹0</p>
+      </div>
+      <div class="flex justify-between items-center mb-4">
+        <p class="text-gray-700">Total:</p>
+        <p id="total" class="text-gray-800 font-bold">₹0</p>
+      </div>
+      <button onclick="checkout()" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 w-full">Proceed to Checkout</button>
+    </div>
   </div>
 
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-white py-4 mt-16">
+    <div class="text-center">
+      <p>&copy; 2025 Smart Trolley. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Script -->
   <script>
-    const sampleCart = [
-      { name: "Milk", price: 45 },
-      { name: "Bread", price: 30 },
-      { name: "Eggs (6 pcs)", price: 60 },
-      { name: "Juice", price: 50 }
-    ];
+    // DEMO DATA: Only use this to populate test data
+    if (!localStorage.getItem("cart")) {
+      const sampleCart = [
+        { name: "Milk", price: 30, quantity: 2 },
+        { name: "Bread", price: 25, quantity: 1 },
+        { name: "Eggs", price: 60, quantity: 1 }
+      ];
+      localStorage.setItem("cart", JSON.stringify(sampleCart));
+    }
 
-    const productListDiv = document.getElementById("productList");
-    let total = 0;
+    const cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-    sampleCart.forEach(item => {
-      const div = document.createElement("div");
-      div.className = "
-    product";
-    div.innerHTML = `
-      <h4>${item.name}</h4>
-      <p>Price: ₹${item.price}</p>
-      <div id="qrcode-${item.name}" class="qrcode"></div>
-    `;
-    productListDiv.appendChild(div);
+    // Load cart items dynamically
+    function loadCart() {
+      const cartTable = document.getElementById("cart-table");
+      cartTable.innerHTML = "";
+      let subtotal = 0;
 
-    // Generate QR Code for each product
-    const qrCodeDiv = document.getElementById(`qrcode-${item.name}`);
-    const qrCodeData = `Product: ${item.name}, Price: ₹${item.price}`;
-    new QRCode(qrCodeDiv, {
-      text: qrCodeData,
-      width: 100,
-      height: 100,
-      colorDark: "#343a40",
-      colorLight: "#f8f9fa",
-      correctLevel: QRCode.CorrectLevel.H
-    });
+      cart.forEach((item, index) => {
+        const total = item.price * item.quantity;
+        subtotal += total;
 
-    total += item.price;
-    });
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td class="border px-4 py-2">${item.name}</td>
+          <td class="border px-4 py-2">₹${item.price}</td>
+          <td class="border px-4 py-2">
+            <input type="number" value="${item.quantity}" min="1" class="w-16 px-2 py-1 border rounded-lg" onchange="updateQuantity(${index}, this.value)">
+          </td>
+          <td class="border px-4 py-2">₹${total}</td>
+          <td class="border px-4 py-2">
+            <button class="text-red-600 hover:underline" onclick="removeItem(${index})">Remove</button>
+          </td>
+        `;
+        cartTable.appendChild(row);
+      });
 
-        alert("Proceeding to Billing...");
-          }
+      const tax = subtotal * 0.05;
+      const total = subtotal + tax;
 
-          function goBack() {
-        alert("Going Back...");
-          }
+      document.getElementById("subtotal").textContent = `₹${subtotal.toFixed(2)}`;
+      document.getElementById("tax").textContent = `₹${tax.toFixed(2)}`;
+      document.getElementById("total").textContent = `₹${total.toFixed(2)}`;
+    }
 
-          function goHome() {
-        alert("Going Home...");
-          }
-        </script>
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    // Update quantity
+    function updateQuantity(index, quantity) {
+      if (quantity < 1) {
+        alert("Quantity must be at least 1.");
+        return;
+      }
+      cart[index].quantity = parseInt(quantity);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      loadCart();
+    }
+
+    // Remove item from cart
+    function removeItem(index) {
+      cart.splice(index, 1);
+      localStorage.setItem("cart", JSON.stringify(cart));
+      loadCart();
+    }
+
+    // Proceed to checkout
+    function checkout() {
+      if (cart.length === 0) {
+        alert("Your cart is empty.");
+        return;
+      }
+      alert("Thank you for your purchase!");
+      localStorage.removeItem("cart");
+      loadCart();
+    }
+
+    // Initial load
+    loadCart();
+  </script>
+</body>
+</html>

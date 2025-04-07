@@ -4,7 +4,8 @@
   <meta charset="UTF-8">
   <title>Seller Inventory</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
+  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database-compat.js"></script> <style>
     body {
       font-family: 'Segoe UI', sans-serif;
       background-color: #f1f3f5;
@@ -135,68 +136,99 @@
   </div>
 
   <script>
-    const tableBody = document.querySelector("#inventoryTable tbody");
-    const form = document.getElementById("productForm");
-    let products = JSON.parse(localStorage.getItem("products")) || [];
-    let editIndex = -1;
-
-    function renderTable() {
-      tableBody.innerHTML = "";
-      products.forEach((product, index) => {
-        const row = document.createElement("tr");
-        row.innerHTML = `
-          <td>${index + 1}</td>
-          <td>${product.name}</td>
-          <td>₹${product.price}</td>
-          <td>
-            <button class="btn btn-edit" onclick="editProduct(${index})">Edit</button>
-            <button class="btn btn-danger" onclick="deleteProduct(${index})">Delete</button>
-          </td>
-        `;
-        tableBody.appendChild(row);
-      });
-
-      localStorage.setItem("products", JSON.stringify(products));
-    }
-
-    function editProduct(index) {
-      const product = products[index];
-      document.getElementById("name").value = product.name;
-      document.getElementById("price").value = product.price;
-      editIndex = index;
-    }
-
-    function deleteProduct(index) {
-      products.splice(index, 1);
-      renderTable();
-    }
-
-    form.addEventListener("submit", (e) => {
-      e.preventDefault();
-      const name = document.getElementById("name").value.trim();
-      const price = parseInt(document.getElementById("price").value);
-
-      if (editIndex >= 0) {
-        products[editIndex] = { name, price };
-        editIndex = -1;
-      } else {
-        products.push({ name, price });
+    document.addEventListener("DOMContentLoaded", () => {
+      const tableBody = document.querySelector("#inventoryTable tbody");
+      const form = document.getElementById("productForm");
+      let editKey = null;
+  
+      // Firebase configuration
+      const firebaseConfig = {
+        apiKey: "AIzaSyBJUHrYQTHeunfLN8SIucWW__9PWYSTAFQ",
+        authDomain: "battle-hacks.firebaseapp.com",
+        databaseURL: "https://battle-hacks-default-rtdb.asia-southeast1.firebasedatabase.app",
+        projectId: "battle-hacks",
+        storageBucket: "battle-hacks.firebasestorage.app",
+        messagingSenderId: "244147143096",
+        appId: "1:244147143096:web:776f207c0d88e9ec55cf4d"
+      };
+  
+      // Initialize Firebase
+      const app = firebase.initializeApp(firebaseConfig);
+      const db = firebase.database();
+  
+      // Fetch products from Firebase
+      function fetchProducts() {
+        firebase.database().ref("products").on("value", (snapshot) => {
+          const products = [];
+          snapshot.forEach((childSnapshot) => {
+            const product = childSnapshot.val();
+            product.key = childSnapshot.key;
+            products.push(product);
+          });
+          renderTable(products);
+        });
       }
-
-      form.reset();
-      renderTable();
+  
+      // Render table
+      function renderTable(products) {
+        tableBody.innerHTML = "";
+        products.forEach((product, index) => {
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${index + 1}</td>
+            <td>${product.name}</td>
+            <td>₹${product.price}</td>
+            <td>
+              <button class="btn btn-edit" onclick="editProduct('${product.key}')">Edit</button>
+              <button class="btn btn-danger" onclick="deleteProduct('${product.key}')">Delete</button>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+      }
+  
+      // Add or update product
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        const name = document.getElementById("name").value.trim();
+        const price = parseInt(document.getElementById("price").value);
+  
+        if (editKey) {
+          firebase.database().ref(`products/${editKey}`).set({ name, price });
+          editKey = null;
+        } else {
+          firebase.database().ref("products").push({ name, price });
+        }
+  
+        form.reset();
+      });
+  
+      // Edit product
+      function editProduct(key) {
+        firebase.database().ref(`products/${key}`).once("value").then((snapshot) => {
+          const product = snapshot.val();
+          document.getElementById("name").value = product.name;
+          document.getElementById("price").value = product.price;
+          editKey = key;
+        });
+      }
+  
+      // Delete product
+      function deleteProduct(key) {
+        firebase.database().ref(`products/${key}`).remove();
+      }
+  
+      function goToQR() {
+        window.location.href = "qrgenerate.html";
+      }
+  
+      function goHome() {
+        window.location.href = "index.html";
+      }
+  
+      // Load products initially
+      fetchProducts();
     });
-
-    function goToQR() {
-      window.location.href = "qrgenerate.html"; // next page
-    }
-
-    function goHome() {
-      window.location.href = "index.html";
-    }
-
-    // Load table initially
-    renderTable();
   </script>
 
 </body>

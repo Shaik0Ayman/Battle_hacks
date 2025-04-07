@@ -2,113 +2,225 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Sensor Simulation</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background-color: #f0f2f5;
-      padding: 20px;
-    }
-
-    h2 {
-      text-align: center;
-      color: #333;
-    }
-
-    .container {
-      max-width: 600px;
-      margin: auto;
-      background: #fff;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .sensor-btn {
-      display: block;
-      width: 100%;
-      padding: 12px;
-      font-size: 16px;
-      background-color: #28a745;
-      color: white;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-      margin-bottom: 20px;
-    }
-
-    .sensor-btn:hover {
-      background-color: #218838;
-    }
-
-    .detected {
-      font-size: 18px;
-      text-align: center;
-      padding: 15px;
-      background-color: #e9f7ef;
-      border-left: 5px solid #28a745;
-      border-radius: 8px;
-    }
-
-    .nav-section {
-      margin-top: 25px;
-      display: flex;
-      justify-content: space-between;
-    }
-
-    .nav-btn {
-      background-color: #6c757d;
-      color: white;
-      padding: 10px 15px;
-      border: none;
-      border-radius: 8px;
-      cursor: pointer;
-    }
-
-    .nav-btn:hover {
-      background-color: #5a6268;
-    }
-  </style>
+  <title>Product Inventory - Smart Trolley</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gray-100 text-gray-900 font-sans">
 
-  <h2>🛰 Product Sensor / Scanner</h2>
+  <!-- Navigation Bar -->
+  <nav class="bg-white shadow-md w-full fixed top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <h1 class="text-2xl font-bold text-indigo-600">Retailer Dashboard</h1>
+        <div>
+          <a href="dashboard.html" class="text-gray-700 hover:text-indigo-600 px-3 py-2">Dashboard</a>
+          <a href="prodsensor.html" class="text-gray-700 hover:text-indigo-600 px-3 py-2">Product Sensor</a>
+          <a href="qrgenerator.html" class="text-gray-700 hover:text-indigo-600 px-3 py-2">QR Generator</a>
+        </div>
+      </div>
+    </div>
+  </nav>
 
-  <div class="container">
-    <button class="sensor-btn" onclick="simulateSensing()">🔍 Scan Product</button>
-    <div id="detectedProduct" class="detected">No product scanned yet.</div>
+  <!-- Main Content -->
+  <div class="pt-20 px-4 sm:px-6 lg:px-8">
+    <h1 class="text-4xl font-bold text-gray-800 mb-6 text-center">📦 Product Inventory</h1>
+
+    <!-- Add Product Form -->
+    <div class="bg-white shadow-lg rounded-lg p-6 mb-8">
+      <h2 class="text-lg font-bold text-gray-800 mb-4">Add New Product</h2>
+      <form id="product-form" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <input id="product-name" type="text" placeholder="Product Name" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600" required>
+        <input id="product-id" type="text" placeholder="Product ID" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600" required>
+        <input id="product-stock" type="number" placeholder="Stock Quantity" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600" required>
+        <input id="product-expiry" type="date" class="px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-600" required>
+        <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 col-span-1 sm:col-span-2 lg:col-span-3">Add Product</button>
+        <p id="form-error" class="text-red-600 hidden col-span-1 sm:col-span-2 lg:col-span-3">Please fill out all fields correctly.</p>
+      </form>
+    </div>
+
+    <!-- Search, Filter, and Export -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8">
+      <input id="search-bar" type="text" placeholder="Search products..." class="w-full md:w-1/3 px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600 mb-4 md:mb-0">
+      <select id="filter-expiry" class="w-full md:w-1/4 px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600">
+        <option value="">All Expiry Status</option>
+        <option value="expired">Expired</option>
+        <option value="valid">Valid</option>
+      </select>
+      <select id="filter-stock" class="w-full md:w-1/4 px-4 py-2 border rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-600">
+        <option value="">All Stock Levels</option>
+        <option value="low">Low Stock</option>
+        <option value="sufficient">Sufficient Stock</option>
+      </select>
+      <button onclick="exportToCSV()" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">Export to CSV</button>
+    </div>
+
+    <!-- Product Table -->
+    <div class="bg-white shadow-lg rounded-lg p-6">
+      <h2 class="text-lg font-bold text-gray-800 mb-4">Product List</h2>
+      <table class="w-full border-collapse">
+        <thead>
+          <tr class="bg-gray-200">
+            <th class="border px-4 py-2">Name</th>
+            <th class="border px-4 py-2">ID</th>
+            <th class="border px-4 py-2">Stock</th>
+            <th class="border px-4 py-2">Expiry</th>
+            <th class="border px-4 py-2">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="product-table">
+          <!-- Products will be dynamically loaded here -->
+        </tbody>
+      </table>
+      <div id="pagination" class="flex justify-center mt-4">
+        <button id="prev-page" class="bg-gray-300 px-4 py-2 rounded-lg mr-2 hover:bg-gray-400" disabled>Previous</button>
+        <button id="next-page" class="bg-gray-300 px-4 py-2 rounded-lg hover:bg-gray-400">Next</button>
+      </div>
+    </div>
   </div>
 
-  <div class="nav-section">
-    <button class="nav-btn" onclick="goBack()">Back to QR Page</button>
-    <button class="nav-btn" onclick="goHome()">Home</button>
-  </div>
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-white py-4 mt-16">
+    <div class="text-center">
+      <p>&copy; 2023 Smart Trolley. All rights reserved.</p>
+    </div>
+  </footer>
 
   <script>
-    function simulateSensing() {
-      const products = JSON.parse(localStorage.getItem("products")) || [];
-      if (products.length === 0) {
-        document.getElementById("detectedProduct").textContent = "⚠ No products found in inventory!";
-        return;
+    const products = JSON.parse(localStorage.getItem("products")) || [];
+
+    // Add 50 sample products if the product list is empty
+    if (products.length === 0) {
+      for (let i = 1; i <= 50; i++) {
+        products.push({
+          name: `Product ${i}`,
+          id: `P${i}`,
+          stock: Math.floor(Math.random() * 100), // Random stock between 0 and 99
+          expiry: new Date(Date.now() + Math.random() * 31536000000).toISOString().split("T")[0] // Random expiry within a year
+        });
       }
-
-      const randomIndex = Math.floor(Math.random() * products.length);
-      const product = products[randomIndex];
-      document.getElementById("detectedProduct").innerHTML = `
-        ✅ Detected: <strong>${product.name}</strong><br>
-        💰 Price: ₹${product.price}
-      `;
+      localStorage.setItem("products", JSON.stringify(products));
     }
 
-    function goBack() {
-      window.location.href = "qr.html";
+    const itemsPerPage = 5;
+    let currentPage = 1;
+
+    const productForm = document.getElementById("product-form");
+    const productTable = document.getElementById("product-table");
+    const searchBar = document.getElementById("search-bar");
+    const filterExpiry = document.getElementById("filter-expiry");
+    const filterStock = document.getElementById("filter-stock");
+
+    // Add product
+    productForm.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const name = document.getElementById("product-name").value.trim();
+      const id = document.getElementById("product-id").value.trim();
+      const stock = parseInt(document.getElementById("product-stock").value.trim());
+      const expiry = document.getElementById("product-expiry").value;
+
+      if (name && id && stock && expiry) {
+        products.push({ name, id, stock, expiry });
+        localStorage.setItem("products", JSON.stringify(products));
+        productForm.reset();
+        document.getElementById("form-error").classList.add("hidden");
+        loadProducts();
+      } else {
+        document.getElementById("form-error").classList.remove("hidden");
+      }
+    });
+
+    // Load products dynamically with pagination
+    function loadProducts() {
+      productTable.innerHTML = "";
+      const searchQuery = searchBar.value.toLowerCase();
+      const expiryFilter = filterExpiry.value;
+      const stockFilter = filterStock.value;
+
+      const filteredProducts = products.filter(product => {
+        const matchesSearch = product.name.toLowerCase().includes(searchQuery) || product.id.toLowerCase().includes(searchQuery);
+        const isExpired = new Date(product.expiry) < new Date();
+        const matchesExpiry = expiryFilter === "expired" ? isExpired : expiryFilter === "valid" ? !isExpired : true;
+        const matchesStock = stockFilter === "low" ? product.stock < 5 : stockFilter === "sufficient" ? product.stock >= 5 : true;
+        return matchesSearch && matchesExpiry && matchesStock;
+      });
+
+      const startIndex = (currentPage - 1) * itemsPerPage;
+      const paginatedProducts = filteredProducts.slice(startIndex, startIndex + itemsPerPage);
+
+      paginatedProducts.forEach(product => {
+        const row = document.createElement("tr");
+        row.className = product.stock < 5 ? "bg-orange-100" : new Date(product.expiry) < new Date() ? "bg-red-100" : "";
+        row.innerHTML = `
+          <td class="border px-4 py-2">${product.name}</td>
+          <td class="border px-4 py-2">${product.id}</td>
+          <td class="border px-4 py-2">${product.stock}</td>
+          <td class="border px-4 py-2">${product.expiry}</td>
+          <td class="border px-4 py-2">
+            <button class="text-blue-600 hover:underline" onclick="editProduct('${product.id}')">Edit</button>
+            <button class="text-red-600 hover:underline" onclick="deleteProduct('${product.id}')">Delete</button>
+          </td>
+        `;
+        productTable.appendChild(row);
+      });
+
+      document.getElementById("prev-page").disabled = currentPage === 1;
+      document.getElementById("next-page").disabled = startIndex + itemsPerPage >= filteredProducts.length;
     }
 
-    function goHome() {
-      window.location.href = "index.html";
+    // Pagination controls
+    document.getElementById("prev-page").addEventListener("click", () => {
+      currentPage--;
+      loadProducts();
+    });
+
+    document.getElementById("next-page").addEventListener("click", () => {
+      currentPage++;
+      loadProducts();
+    });
+
+    // Export to CSV
+    function exportToCSV() {
+      const csvContent = "data:text/csv;charset=utf-8," + 
+        ["Name,ID,Stock,Expiry"].concat(products.map(p => `${p.name},${p.id},${p.stock},${p.expiry}`)).join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", "product_inventory.csv");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
     }
+
+    // Edit product
+    function editProduct(id) {
+      const product = products.find(p => p.id === id);
+      if (product) {
+        document.getElementById("product-name").value = product.name;
+        document.getElementById("product-id").value = product.id;
+        document.getElementById("product-stock").value = product.stock;
+        document.getElementById("product-expiry").value = product.expiry;
+        deleteProduct(id);
+      }
+    }
+
+    // Delete product
+    function deleteProduct(id) {
+      const index = products.findIndex(p => p.id === id);
+      if (index !== -1) {
+        products.splice(index, 1);
+        localStorage.setItem("products", JSON.stringify(products));
+        loadProducts();
+      }
+    }
+
+    // Event listeners for search and filter
+    searchBar.addEventListener("input", loadProducts);
+    filterExpiry.addEventListener("change", loadProducts);
+    filterStock.addEventListener("change", loadProducts);
+
+    // Initial load
+    loadProducts();
   </script>
-
 </body>
 </html>

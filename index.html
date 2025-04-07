@@ -7,28 +7,59 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/@popperjs/core@2"></script>
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19"></script>
 </head>
-<body class="bg-gray-100 text-gray-900 font-sans">
+<body class="bg-gray-100 text-gray-900 font-sans transition-colors duration-300">
 
-  <div class="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-indigo-200 via-purple-200 to-pink-200">
+  <!-- Navigation Bar -->
+  <nav class="bg-white shadow-md w-full fixed top-0 z-50 transition-all duration-300">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <div class="flex items-center">
+          <h1 class="text-2xl font-bold text-indigo-600">Smart Trolley</h1>
+        </div>
+        <div class="flex items-center space-x-4">
+          <a href="#about" class="text-gray-700 hover:text-indigo-600 px-3 py-2">About</a>
+          <a href="#roles" class="text-gray-700 hover:text-indigo-600 px-3 py-2">Roles</a>
+          <button id="dark-mode-toggle" class="text-gray-700 hover:text-indigo-600 px-3 py-2">
+            <svg id="dark-mode-icon" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m8.485-8.485h-1M4.515 12h-1m15.364 4.95l-.707-.707M6.343 6.343l-.707-.707m12.728 12.728l-.707-.707M6.343 17.657l-.707-.707M12 5a7 7 0 100 14 7 7 0 000-14z" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-indigo-200 via-purple-200 to-pink-200 pt-16">
     <div class="text-center mb-8">
-      <h1 class="text-5xl font-bold text-gray-800 animate_animated animate_fadeInDown">Welcome to Kart Sentinel</h1>
-      <p class="mt-4 text-lg text-gray-700 animate_animated animatefadeIn animate_delay-1s">Please select your role to continue</p>
+      <h1 class="text-5xl font-bold text-gray-800 animate__animated animate__fadeInDown">Welcome to Smart Trolley</h1>
+      <p class="mt-4 text-lg text-gray-700 animate__animated animate__fadeIn animate__delay-1s">Please select your role to continue</p>
     </div>
 
-    <div class="flex gap-10 animate_animated animatezoomIn animate_delay-2s">
+    <div id="roles" class="flex gap-10 animate__animated animate__zoomIn animate__delay-2s">
       <!-- Customer Card -->
-      <div onclick="openModal('Customer')" class="cursor-pointer bg-white rounded-2xl shadow-xl p-8 w-72 hover:scale-105 transition">
+      <div onclick="openModal('Customer')" class="cursor-pointer bg-white rounded-2xl shadow-xl p-8 w-72 hover:scale-105 transition" role="button" aria-label="Select Customer Role">
         <img src="https://img.icons8.com/fluency/96/shopping-cart-loaded.png" class="mx-auto mb-4" alt="Customer"/>
         <h2 class="text-2xl font-semibold text-center">I am a Customer</h2>
+        <a href="scanqr.html" class="block mt-4 text-indigo-600 hover:underline text-center">Scan QR Code</a>
       </div>
 
       <!-- Seller Card -->
-      <div onclick="openModal('Seller')" class="cursor-pointer bg-white rounded-2xl shadow-xl p-8 w-72 hover:scale-105 transition">
+      <div onclick="openModal('Seller')" class="cursor-pointer bg-white rounded-2xl shadow-xl p-8 w-72 hover:scale-105 transition" role="button" aria-label="Select Seller Role">
         <img src="https://img.icons8.com/fluency/96/sell.png" class="mx-auto mb-4" alt="Seller"/>
-        <h2 class="text-2xl font-semibold text-center">I am a Retailer
-        </h2>
+        <h2 class="text-2xl font-semibold text-center">I am a Seller</h2>
       </div>
+    </div>
+
+    <!-- About Section -->
+    <div id="about" class="mt-16 text-center">
+      <h2 class="text-3xl font-bold text-gray-800">About Smart Trolley</h2>
+      <p class="mt-4 text-lg text-gray-700 max-w-2xl mx-auto">
+        Smart Trolley is a revolutionary system designed to enhance the shopping experience for customers and streamline operations for retailers. Explore our features and see how we can make your life easier.
+      </p>
+      <button class="mt-6 bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700" onclick="learnMore()">Learn More</button>
     </div>
   </div>
 
@@ -36,12 +67,20 @@
   <div id="roleModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
     <div class="bg-white p-6 rounded-xl w-96 text-center shadow-2xl">
       <h2 class="text-2xl font-bold mb-4">Continue as <span id="selectedRole" class="text-indigo-600"></span>?</h2>
+      <p class="text-gray-700 mb-4">You will be redirected to the appropriate dashboard based on your selection.</p>
       <div class="flex justify-around mt-6">
         <button onclick="proceed()" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700">Yes</button>
         <button onclick="closeModal()" class="bg-gray-300 px-6 py-2 rounded-lg hover:bg-gray-400">Cancel</button>
       </div>
     </div>
   </div>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-white py-4 mt-16">
+    <div class="text-center">
+      <p>&copy; 2023 Smart Trolley. All rights reserved.</p>
+    </div>
+  </footer>
 
   <script>
     let role = "";
@@ -59,11 +98,28 @@
 
     function proceed() {
       if (role === "Customer") {
-        window.location.href = "./customer/cart.html";
+        window.location.href = "./customer/viewproducts.html";
       } else if (role === "Seller") {
-        window.location.href = "./Retailer/inventory.html";
+        window.location.href = "./retailer/dashboard.html";
+      } else {
+        alert("The selected role's page is not available.");
       }
     }
+
+    function learnMore() {
+      alert("Smart Trolley is designed to simplify shopping and retail management. Stay tuned for more updates!");
+    }
+
+    // Dark Mode Toggle
+    const darkModeToggle = document.getElementById("dark-mode-toggle");
+    const darkModeIcon = document.getElementById("dark-mode-icon");
+    darkModeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("bg-gray-900");
+      document.body.classList.toggle("text-white");
+      document.body.classList.toggle("bg-gray-100");
+      document.body.classList.toggle("text-gray-900");
+      darkModeIcon.classList.toggle("rotate-180");
+    });
   </script>
 </body>
 </html>

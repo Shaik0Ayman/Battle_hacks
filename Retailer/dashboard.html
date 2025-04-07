@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Retailer Dashboard - Smart Trolley</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 text-gray-900 font-sans">
+
+  <!-- Navigation Bar -->
+  <nav class="bg-white shadow-md w-full fixed top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex justify-between items-center h-16">
+        <h1 class="text-2xl font-bold text-indigo-600">Retailer Dashboard</h1>
+        <div>
+          <a href="dashboard.html" class="text-gray-700 hover:text-indigo-600 px-3 py-2">Dashboard</a>
+          <a href="prodsensor.html" class="text-gray-700 hover:text-indigo-600 px-3 py-2">Product Sensor</a>
+          <a href="qrgenerator.html" class="text-gray-700 hover:text-indigo-600 px-3 py-2">QR Generator</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <div class="pt-20 px-4 sm:px-6 lg:px-8">
+    <h1 class="text-4xl font-bold text-gray-800 mb-6 text-center">📊 Retailer Dashboard</h1>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div class="bg-white shadow-lg rounded-lg p-6">
+        <h2 class="text-lg font-bold text-gray-800">Total Products</h2>
+        <p id="total-products" class="text-3xl font-bold text-indigo-600">0</p>
+      </div>
+      <div class="bg-white shadow-lg rounded-lg p-6">
+        <h2 class="text-lg font-bold text-gray-800">Low Stock</h2>
+        <p id="low-stock" class="text-3xl font-bold text-red-600">0</p>
+      </div>
+      <div class="bg-white shadow-lg rounded-lg p-6">
+        <h2 class="text-lg font-bold text-gray-800">QR Codes Generated</h2>
+        <p id="qr-codes" class="text-3xl font-bold text-indigo-600">0</p>
+      </div>
+      <div class="bg-white shadow-lg rounded-lg p-6">
+        <h2 class="text-lg font-bold text-gray-800">Last Login</h2>
+        <p id="last-login" class="text-lg text-gray-600">N/A</p>
+      </div>
+    </div>
+
+    <!-- Visual Analytics -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+      <div class="bg-white shadow-lg rounded-lg p-6">
+        <h2 class="text-lg font-bold text-gray-800 mb-4">Stock Distribution</h2>
+        <canvas id="stock-chart"></canvas>
+      </div>
+      <div class="bg-white shadow-lg rounded-lg p-6">
+        <h2 class="text-lg font-bold text-gray-800 mb-4">Product Additions Over Time</h2>
+        <canvas id="additions-chart"></canvas>
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="bg-white shadow-lg rounded-lg p-6 mb-8">
+      <h2 class="text-lg font-bold text-gray-800 mb-4">Recent Activity</h2>
+      <ul id="recent-activity" class="list-disc pl-6 text-gray-700">
+        <!-- Recent activity items will be dynamically loaded here -->
+      </ul>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      <a href="prodsensor.html" class="bg-indigo-600 text-white px-6 py-4 rounded-lg shadow-lg hover:bg-indigo-700 text-center">
+        ➕ Add New Product
+      </a>
+      <a href="qrgenerate.html" class="bg-indigo-600 text-white px-6 py-4 rounded-lg shadow-lg hover:bg-indigo-700 text-center">
+        🧾 Generate QR Code
+      </a>
+      <button onclick="clearInventory()" class="bg-red-600 text-white px-6 py-4 rounded-lg shadow-lg hover:bg-red-700 text-center">
+        🧹 Clear Inventory
+      </button>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-white py-4 mt-16">
+    <div class="text-center">
+      <p>&copy; 2023 Smart Trolley. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script>
+    // Sample data
+    const products = [
+      { name: "Smartphone", category: "Electronics", stock: 10 },
+      { name: "Headphones", category: "Electronics", stock: 2 },
+      { name: "Apples", category: "Groceries", stock: 0 },
+      { name: "T-Shirts", category: "Fashion", stock: 5 }
+    ];
+    const qrCodesGenerated = 15;
+    const lastLogin = "2023-10-01 10:00 AM";
+
+    // Load dashboard data
+    function loadDashboard() {
+      // Quick Stats
+      document.getElementById("total-products").textContent = products.length;
+      document.getElementById("low-stock").textContent = products.filter(p => p.stock < 5).length;
+      document.getElementById("qr-codes").textContent = qrCodesGenerated;
+      document.getElementById("last-login").textContent = lastLogin;
+
+      // Stock Distribution Chart
+      const stockChartCtx = document.getElementById("stock-chart").getContext("2d");
+      const stockCategories = [...new Set(products.map(p => p.category))];
+      const stockCounts = stockCategories.map(category =>
+        products.filter(p => p.category === category).reduce((sum, p) => sum + p.stock, 0)
+      );
+      new Chart(stockChartCtx, {
+        type: "pie",
+        data: {
+          labels: stockCategories,
+          datasets: [{
+            data: stockCounts,
+            backgroundColor: ["#6366F1", "#F59E0B", "#10B981", "#EF4444"]
+          }]
+        }
+      });
+
+      // Product Additions Over Time Chart
+      const additionsChartCtx = document.getElementById("additions-chart").getContext("2d");
+      new Chart(additionsChartCtx, {
+        type: "bar",
+        data: {
+          labels: ["Week 1", "Week 2", "Week 3", "Week 4"],
+          datasets: [{
+            label: "Products Added",
+            data: [5, 10, 7, 12],
+            backgroundColor: "#6366F1"
+          }]
+        }
+      });
+
+      // Recent Activity
+      const recentActivity = [
+        "Added 5 new products",
+        "Generated 3 QR codes",
+        "Updated stock for 'Apples'"
+      ];
+      const recentActivityList = document.getElementById("recent-activity");
+      recentActivity.forEach(activity => {
+        const listItem = document.createElement("li");
+        listItem.textContent = activity;
+        recentActivityList.appendChild(listItem);
+      });
+    }
+
+    // Clear inventory
+    function clearInventory() {
+      if (confirm("Are you sure you want to clear the inventory?")) {
+        alert("Inventory cleared!");
+        // Logic to clear inventory goes here
+      }
+    }
+
+    // Initialize dashboard
+    loadDashboard();
+  </script>
+</body>
+</html>
