@@ -139,12 +139,8 @@
       db.ref(`cart/${cartItemId}`).remove();
     }
   
-    // Proceed to checkout
-    // Proceed to checkout
-    // Proceed to checkout
-    // Proceed to checkout
-    // Proceed to checkout
-    function checkout() {
+
+        function checkout() {
       const subtotal = parseFloat(document.getElementById("subtotal").textContent.replace("₹", ""));
       const tax = parseFloat(document.getElementById("tax").textContent.replace("₹", ""));
       const total = subtotal + tax;
@@ -156,14 +152,14 @@
     
       // Generate UPI QR Code
       const upiID = "shaikaymanhameedbaig@okhdfcbank"; // Replace with your UPI ID
-      const upiPayload = `upi://pay?pa=${upiID}&pn=Smart Trolley&am=${total.toFixed(2)}&cu=INR`;
+      const upiPayload = `upi://pay?pa=${upiID}&pn=SmartTrolley&am=${total.toFixed(2)}&cu=INR`;
     
       console.log("UPI Payload:", upiPayload); // Debugging
     
       // Clear the cart in Firebase
       db.ref("cart").remove();
     
-      // Display the QR code
+      // Display the QR code and Pay button
       const qrContainer = document.createElement("div");
       qrContainer.className = "bg-white shadow-lg rounded-lg p-6 text-center";
       qrContainer.innerHTML = `
@@ -171,6 +167,7 @@
         <canvas id="qr-code" class="mb-4"></canvas>
         <p class="text-gray-700">Total Amount: <span class="font-bold text-gray-800">₹${total.toFixed(2)}</span></p>
         <p class="text-gray-700">UPI ID: <span class="font-bold text-gray-800">${upiID}</span></p>
+        <a href="${upiPayload}" class="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 mt-4 inline-block" target="_blank">Pay</a>
         <button onclick="location.reload()" class="bg-indigo-600 text-white px-6 py-2 rounded-lg hover:bg-indigo-700 mt-4">Done</button>
       `;
       document.body.innerHTML = ""; // Clear the page
