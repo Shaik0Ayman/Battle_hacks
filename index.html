@@ -13,7 +13,7 @@
 
   <!-- Navigation Bar -->
   <nav class="bg-white shadow-md w-full fixed top-0 z-50 transition-all duration-300">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8">
       <div class="flex justify-between items-center h-16">
         <div class="flex items-center">
           <h1 class="text-2xl font-bold text-indigo-600">Smart Trolley</h1>
@@ -32,13 +32,13 @@
   </nav>
 
   <!-- Main Content -->
-  <div class="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-indigo-200 via-purple-200 to-pink-200 pt-16">
+  <div class="container mx-auto px-4 sm:px-6 lg:px-8 min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-indigo-200 via-purple-200 to-pink-200 pt-16">
     <div class="text-center mb-8">
       <h1 class="text-5xl font-bold text-gray-800 animate__animated animate__fadeInDown">Welcome to Smart Trolley</h1>
       <p class="mt-4 text-lg text-gray-700 animate__animated animate__fadeIn animate__delay-1s">Please select your role to continue</p>
     </div>
 
-    <div id="roles" class="flex gap-10 animate__animated animate__zoomIn animate__delay-2s">
+    <div id="roles" class="flex flex-wrap justify-center gap-10 animate__animated animate__zoomIn animate__delay-2s">
       <!-- Customer Card -->
       <div onclick="openModal('Customer')" class="cursor-pointer bg-white rounded-2xl shadow-xl p-8 w-72 hover:scale-105 transition" role="button" aria-label="Select Customer Role">
         <img src="https://img.icons8.com/fluency/96/shopping-cart-loaded.png" class="mx-auto mb-4" alt="Customer"/>
@@ -77,7 +77,7 @@
 
   <!-- Footer -->
   <footer class="bg-gray-800 text-white py-4 mt-16">
-    <div class="text-center">
+    <div class="container mx-auto text-center">
       <p>&copy; 2023 Smart Trolley. All rights reserved.</p>
     </div>
   </footer>
